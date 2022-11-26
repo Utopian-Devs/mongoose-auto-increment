@@ -1,17 +1,17 @@
 // Module Scope
-import { Schema } from "mongoose";
-import extend from "extend";
-var counterSchema;
-var IdentityCounter;
+var mongoose = require("mongoose"),
+  extend = require("extend"),
+  counterSchema,
+  IdentityCounter;
 
 // Initialize plugin by creating counter collection in database.
-export function initialize(connection) {
+exports.initialize = function (connection) {
   try {
     IdentityCounter = connection.model("IdentityCounter");
   } catch (ex) {
     if (ex.name === "MissingSchemaError") {
       // Create new counter schema.
-      counterSchema = new Schema({
+      counterSchema = new mongoose.Schema({
         model: { type: String, require: true },
         field: { type: String, require: true },
         count: { type: Number, default: 0 },
@@ -24,10 +24,10 @@ export function initialize(connection) {
       IdentityCounter = connection.model("IdentityCounter", counterSchema);
     } else throw ex;
   }
-}
+};
 
 // The function to use when invoking the plugin on a custom schema.
-export function plugin(schema, options) {
+exports.plugin = function (schema, options) {
   // If we don't have reference to the counterSchema or the IdentityCounter model then the plugin was most likely not
   // initialized properly so throw an error.
   if (!counterSchema || !IdentityCounter) throw new Error("mongoose-auto-increment has not been initialized");
@@ -167,4 +167,4 @@ export function plugin(schema, options) {
     // not specify that we should increment on updates, then just continue the save without any increment logic.
     else next();
   });
-}
+};
